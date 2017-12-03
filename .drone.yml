@@ -1,6 +1,5 @@
 pipeline:
     build:
-
       image: docker:latest
       environment:
           - DOCKER_HOST=unix:///tmp/host.sock
