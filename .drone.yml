@@ -5,12 +5,11 @@ pipeline:
           - DOCKER_HOST=unix:///tmp/host.sock
           - DHUB_LOGIN=${DHUB_LOGIN}
           - DHUB_PW=${DHUB_PW}
-          #- DOCKER_AUTH=${DOCKER_AUTH}
       volumes:
           - /var/run/docker.sock:/tmp/host.sock:rw
       privileged: true
       commands:
-          - docker build -t pingu/orangeteamspeak:latest .
+          - docker build -t pingu/mobispring:latest .
       when:
           branch: [ master ]
 
@@ -18,22 +17,7 @@ pipeline:
       image: plugins/docker
       username: ${DHUB_LOGIN}
       password: ${DHUB_PW}
-      repo: pingu/orangeteamspeak
+      repo: pingu/mobispring
       tags: latest
       when:
         status: [ success ]
-
-
-    notify:
-      image: plugins/slack
-      webhook: ${SLACK_WEBHOOK}
-      channel: drone
-      username: drone-ci
-      template: |
-        *{{ repo.name }}* #{{ build.number }} by *{{ build.author }}* finished with a *{{ uppercase build.status }}* in {{ since build.created }}
-        *Commit*: _{{ build.commit }}_
-        *Branch*:  _{{ build.branch }}_
-        {{ build.link }}
-      when:
-        event: [ push, tag, deployment, pull_request ]
-        status: [ success, failure ]
