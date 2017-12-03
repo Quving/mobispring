@@ -24,7 +24,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class Geofox {
-
 	private String GEOFOX_API_BASE_URL;
 	private String GEOFOX_API_USER;
 	private String GEOFOX_API_PASSWORD;
@@ -36,8 +35,8 @@ public class Geofox {
 		GEOFOX_API_BASE_URL = env.get("GEOFOX_API_URL");
 
 		try {
-			System.out.println(this.checkName("Saarlandstrasse", "STATION").toString(4));
-			System.out.println(this.departureListNow("Saarlandstrasse").toString(4));
+			// System.out.println(this.checkName("Saarlandstrasse", "STATION").toString(4));
+			System.out.println(this.departureListNow("Dammtor").toString(4));
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (StationNotFoundException e) {
@@ -79,6 +78,7 @@ public class Geofox {
 		requestBody.put("time", time);
 		requestBody.put("station", theName);
 		requestBody.put("maxList", 32);
+		requestBody.put("maxTimeOffset", 60); 
 		requestBody.put("useRealtime", "true");
 		Request request = buildRequest(geofox_url, requestBody);
 		return sendRequest(request);

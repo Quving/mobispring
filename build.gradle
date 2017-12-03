@@ -26,8 +26,12 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
-    // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.2.0'
+        // https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+        compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.2.0'
+
+        // https://mvnrepository.com/artifact/org.json/json
+        compile group: 'org.json', name: 'json', version: '20171018'
+
 
         testCompile('org.springframework.boot:spring-boot-starter-test')
 }
