@@ -13,6 +13,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,30 +35,76 @@ public class Geofox {
 		GEOFOX_API_PASSWORD = env.get("GEOFOX_API_PASSWORD");
 		GEOFOX_API_BASE_URL = env.get("GEOFOX_API_URL");
 
+	}
+
+	public static void main(String[] args) {
+		Geofox geofox = new Geofox();
+
 		try {
-			// System.out.println(this.checkName("Saarlandstrasse", "STATION").toString(4));
-			System.out.println(this.departureListNow("Dammtor").toString(4));
-		} catch (JSONException e) {
-			e.printStackTrace();
+			System.out.println(geofox.departureListNow("Farmsen", 10, 10).toString(4));
 		} catch (StationNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public JSONObject departureListNow(String station) throws JSONException, StationNotFoundException {
+	/**
+	 * Returns the ID of a given station if the station exists.
+	 * 
+	 * @param station
+	 * @return
+	 * @throws StationNotFoundException
+	 */
+	private String getStationId(String station) throws StationNotFoundException {
 
 		// Validate otherwise throw Exception
 		JSONObject response = this.checkName(station, "STATION");
-		if (!response.getString("returnCode").equals("OK")) {
+		if (!response.getString("returnCode").equals("OK"))
 			throw new StationNotFoundException("Die Station '" + station + "' could not be found.");
+		else {
+			String stationId = response.getJSONArray("results").getJSONObject(0).getString("id");
+			return stationId;
 		}
+	}
 
-		String stationId = response.getJSONArray("results").getJSONObject(0).getString("id");
+	/**
+	 * Returns a departure-list of a given station for current time and timeOffset
+	 * (minutes)
+	 * 
+	 * @param station
+	 * @param timeOffset
+	 * @param maxList
+	 * @return
+	 * @throws StationNotFoundException
+	 */
+	public JSONObject departureListNow(String station, int timeOffset, int maxList) throws StationNotFoundException {
+		// Add timeOffset to current time. Create GTITime object.
+		DateFormat dateFormatDate = new SimpleDateFormat("dd.MM.yyyy");
+		DateFormat dateFormatTime = new SimpleDateFormat("HH:mm");
+		Date targetTime = new Date(); // now
+		targetTime = DateUtils.addMinutes(targetTime, timeOffset);
+
+		return this.departureList(station, dateFormatDate.format(targetTime), dateFormatTime.format(targetTime),
+				maxList);
+	}
+
+	/**
+	 * Returns a departureList of a given station.
+	 * 
+	 * @param station
+	 * @param ddMMyyyy
+	 * @param HHmm
+	 * @param maxList
+	 * @return
+	 * @throws StationNotFoundException
+	 */
+	public JSONObject departureList(String station, String ddMMyyyy, String HHmm, int maxList) {
 		String geofox_url = GEOFOX_API_BASE_URL + "departureList";
-		System.out.println(stationId);
-
-		JSONObject requestBody = new JSONObject();
+		String stationId = "";
+		try {
+			stationId = getStationId(station);
+		} catch (StationNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		// Create TheName object
 		JSONObject theName = new JSONObject();
@@ -65,26 +112,21 @@ public class Geofox {
 		theName.put("type", "STATION");
 		theName.put("id", stationId);
 
-		// Create GTITime object.
-		DateFormat dateFormatDate = new SimpleDateFormat("dd.MM.yyyy");
-		DateFormat dateFormatTime = new SimpleDateFormat("HH:mm");
-		Date date = new Date();
-
 		JSONObject time = new JSONObject();
-		time.put("date", dateFormatDate.format(date));
-		time.put("time", dateFormatTime.format(date));
-
+		time.put("date", ddMMyyyy);
+		time.put("time", HHmm);
 		// Create RequestBody object.
+		JSONObject requestBody = new JSONObject();
 		requestBody.put("time", time);
 		requestBody.put("station", theName);
 		requestBody.put("maxList", 32);
-		requestBody.put("maxTimeOffset", 60); 
+		requestBody.put("maxTimeOffset", 60);
 		requestBody.put("useRealtime", "true");
 		Request request = buildRequest(geofox_url, requestBody);
 		return sendRequest(request);
 	}
 
-	public JSONObject checkName(String station, String type) throws JSONException {
+	private JSONObject checkName(String station, String type) throws JSONException {
 		String geofox_url = GEOFOX_API_BASE_URL + "checkName";
 
 		// the name
@@ -92,7 +134,7 @@ public class Geofox {
 		theName.put("name", station);
 		theName.put("type", type);
 
-		// request json
+		// Request Json
 		JSONObject requestJson = new JSONObject();
 		requestJson.put("coordinateType", "EPSG_4326");
 		requestJson.put("maxList", 1);
@@ -104,23 +146,7 @@ public class Geofox {
 		return sendRequest(request);
 	}
 
-	public void getRouteTest() throws JSONException {
-		String geofox_url = GEOFOX_API_BASE_URL + "getRoute";
-
-		JSONObject requestJson = new JSONObject();
-		requestJson.put("language", "de");
-		requestJson.put("version", 27);
-		requestJson.put("start", createHauptbahnhofJSON());
-		requestJson.put("dest", createBarmbekJSON());
-		requestJson.put("time", createTimeJSON());
-		requestJson.put("timeIsDeparture", true);
-		requestJson.put("numberOfSchedules", 1);
-
-		Request request = buildRequest(geofox_url, requestJson);
-		sendRequest(request);
-	}
-
-	public static String makeSignature(String password, byte[] requestBody) {
+	public String makeSignature(String password, byte[] requestBody) {
 		final Charset passwordEncoding = Charset.forName("UTF-8");
 		final String algorithm = "HmacSHA1";
 
@@ -140,14 +166,21 @@ public class Geofox {
 		return DatatypeConverter.printBase64Binary(signature);
 	}
 
-	public Request buildRequest(String api_endpoint, JSONObject requestJson) {
+	/**
+	 * Returns a request-object.
+	 * 
+	 * @param apiEndpoint
+	 * @param requestJson
+	 * @return
+	 */
+	public Request buildRequest(String apiEndpoint, JSONObject requestJson) {
 		MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 		RequestBody body = RequestBody.create(JSON, requestJson.toString());
 
-		// passwort hash
+		// Password hash
 		String userSignature = makeSignature(GEOFOX_API_PASSWORD, requestJson.toString().getBytes());
 
-		return new Request.Builder().url(api_endpoint).post(body).addHeader("Accept", "application/json")
+		return new Request.Builder().url(apiEndpoint).post(body).addHeader("Accept", "application/json")
 				.addHeader("geofox-auth-type", "HmacSha1").addHeader("Content-Type", "application/json")
 				.addHeader("Geofox-Auth-User", GEOFOX_API_USER).addHeader("geofox-auth-signature", userSignature)
 				.build();
@@ -166,17 +199,5 @@ public class Geofox {
 		}
 
 		return outjson;
-	}
-
-	public JSONObject createHauptbahnhofJSON() throws JSONException {
-		return new JSONObject().put("id", "Master:9910910").put("type", "STATION");
-	}
-
-	public JSONObject createBarmbekJSON() throws JSONException {
-		return new JSONObject().put("id", "Master:70950").put("type", "STATION");
-	}
-
-	public JSONObject createTimeJSON() throws JSONException {
-		return new JSONObject().put("date", "23.11.2017").put("time", "15:00");
 	}
 }
