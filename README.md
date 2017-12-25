@@ -11,7 +11,7 @@ ___
 ## Installation
 ###### Install docker and run the application:
 - ``` docker pull pingu/mobispring ```
-- ``` docker run -d -p 8080:8080 pingu/mobispring```
+- ``` docker run -d -e GEOFOX_API_USER='user123' -e GEOFOX_API_PASSWORD='passw123' -e GEOFOX_API_URL='http://api.endpoint/' -p 8080:8080 pingu/mobispring```
 
 
 ###### Install java and gradle, build and host it by yourself.
