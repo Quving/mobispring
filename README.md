@@ -9,6 +9,12 @@ ___
 ``` curl -X POST -H "Content-Type: application/json" -d '{"station":"Farmsen", "hhMMyyyy":"24.12.2017", "HHmm":"23:24", "maxList":"2"}' http://localhost:8080/api/geofox/departuretime ```
 ___
 ## Installation
+###### Install docker and run the application:
+``` docker pull pingu/mobispring ```
+``` docker run -d -p 8080:8080 pingu/mobispring```
+
+
+###### Install java and gradle, build and host it by yourself.
 - ```./gradlew clean build```
 - ```./gradlew bootRun```
 ___
