@@ -21,7 +21,7 @@ public class GeofoxController {
 				input.getMaxList()).toString(4);
 		return response;
 	}
-	@RequestMapping(method = RequestMethod.GET, value="")
+	@RequestMapping(method = RequestMethod.GET, value="/api")
 	public String welcome() {
 		Geofox geofox = new Geofox();
 		String response = geofox.welcome().toString(4);
