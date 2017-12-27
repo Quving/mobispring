@@ -1,20 +1,8 @@
 pipeline:
-    build:
-      image: docker:latest
-      environment:
-          - DOCKER_HOST=unix:///tmp/host.sock
-      volumes:
-          - /var/run/docker.sock:/tmp/host.sock:rw
-      privileged: true
-      commands:
-          - docker build -t pingu/mobispring:latest .
-      when:
-          branch: [ master ]
-
-    publish:
-      image: plugins/docker
-      repo: pingu/mobispring
-      tags: latest
-      secrets: [ docker_username, docker_password ]
-      when:
-        status: [ success ]
+  publish:
+    image: plugins/docker
+    repo: pingu/mobispring
+    tags: latest
+    secrets: [ docker_username, docker_password ]
+    when:
+      status: [ success ]
