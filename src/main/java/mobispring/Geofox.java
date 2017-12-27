@@ -46,7 +46,17 @@ public class Geofox {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * Welcome JSON.
+	 * @return
+	 */
+	public JSONObject welcome() {
+		JSONObject welcome = new JSONObject();
+		welcome.put("status", "online");
+		welcome.put("name", "Mobispring");
+		return welcome;
+	}
 	/**
 	 * Returns the ID of a given station if the station exists.
 	 * 
