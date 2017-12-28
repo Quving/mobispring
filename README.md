@@ -1,3 +1,5 @@
+[![Build Status](http://drone.vingu.online/api/badges/Quving/mobispring/status.svg)](http://drone.vingu.online/Quving/mobispring)
+
 # What is Mobispring?
 It provides a RestAPI to retrieve informations regarding the transport-network in Hamburg/Germany using the framework [Spring](https://projects.spring.io/spring-boot/).
 To be able hosting it by yourself, you need to request an access to the [Geofox-API](http://www.geofox.de/).
