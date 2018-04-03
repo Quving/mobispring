@@ -46,9 +46,10 @@ public class Geofox {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Welcome JSON.
+	 * 
 	 * @return
 	 */
 	public JSONObject welcome() {
@@ -57,6 +58,7 @@ public class Geofox {
 		welcome.put("name", "Mobispring");
 		return welcome;
 	}
+
 	/**
 	 * Returns the ID of a given station if the station exists.
 	 * 
@@ -92,7 +94,7 @@ public class Geofox {
 		DateFormat dateFormatTime = new SimpleDateFormat("HH:mm");
 		Date targetTime = new Date(); // now
 		targetTime = DateUtils.addMinutes(targetTime, timeOffset);
-
+		
 		return this.departureList(station, dateFormatDate.format(targetTime), dateFormatTime.format(targetTime),
 				maxList);
 	}
@@ -129,7 +131,7 @@ public class Geofox {
 		JSONObject requestBody = new JSONObject();
 		requestBody.put("time", time);
 		requestBody.put("station", theName);
-		requestBody.put("maxList", 32);
+		requestBody.put("maxList", maxList);
 		requestBody.put("maxTimeOffset", 60);
 		requestBody.put("useRealtime", "true");
 		Request request = buildRequest(geofox_url, requestBody);
